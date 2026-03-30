@@ -1,0 +1,18 @@
+# Node & React Native
+node_modules/
+.expo/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.pnp.*
+.vscode/
+
+# Python & Django
+venv/
+__pycache__/
+*.py[cod]
+*$py.class
+*.sqlite3
+db.sqlite3
+.env
+.DS_Store

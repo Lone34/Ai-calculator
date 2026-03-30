@@ -1,0 +1,23 @@
+{
+  "expo": {
+    "name": "aether-math",
+    "slug": "aether-math",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "userInterfaceStyle": "dark",
+    "assetBundlePatterns": [
+      "**/*"
+    ],
+    "ios": {
+      "supportsTablet": true
+    },
+    "android": {
+      "adaptiveIcon": {
+        "backgroundColor": "#0B0D17"
+      }
+    },
+    "web": {
+      "bundler": "metro"
+    }
+  }
+}
