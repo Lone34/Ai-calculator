@@ -16,6 +16,10 @@ import re
 from .models import MathSession, Interaction, User
 from .serializers import MathSessionSerializer, InteractionSerializer, UserSerializer
 from .tasks import evaluate_math_expression
+from .subscriptions import (
+    grant_free_trial_if_eligible,
+    user_has_subscription_access,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -47,7 +51,15 @@ class RegisterView(APIView):
         if serializer.is_valid():
             user = serializer.save()
             token, _ = Token.objects.get_or_create(user=user)
-            return Response({'token': token.key, 'user_id': user.id}, status=status.HTTP_201_CREATED)
+            trial_result = grant_free_trial_if_eligible(user=user, request=request)
+            trial_subscription = trial_result.get('subscription')
+            return Response({
+                'token': token.key,
+                'user_id': user.id,
+                'trial_granted': bool(trial_result.get('granted')),
+                'trial_reason': trial_result.get('reason'),
+                'trial_ends_at': getattr(trial_subscription, 'ends_at', None),
+            }, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 class LoginView(APIView):
@@ -181,6 +193,14 @@ class AISolveView(APIView):
     permission_classes = [IsAuthenticated]
     
     def post(self, request):
+        enforce_subscription = getattr(settings, 'SUBSCRIPTION_ENFORCE_AI_SOLVE', True)
+        if enforce_subscription:
+            if not user_has_subscription_access(request.user):
+                return Response({
+                    'error': 'Active subscription required for AI Solve and Sketch Solve.',
+                    'code': 'subscription_required',
+                }, status=402)
+
         message = request.data.get('message', '').strip()
         image_base64 = request.data.get('image', None)
         image_mime = request.data.get('image_mime', 'image/jpeg')

@@ -2,9 +2,7 @@ import React, { useState } from 'react';
 import { View, Text, TextInput, TouchableOpacity, SafeAreaView, Alert, KeyboardAvoidingView, Platform } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import axios from 'axios';
-
-// Ensure this IP matches your computer's local network IP where Django is running
-const API_URL = 'http://10.99.170.36:8000/api';
+import { API_URL } from '../config/api';
 
 export default function LoginScreen({ navigation, route }) {
   const [username, setUsername] = useState('');
@@ -29,8 +27,8 @@ export default function LoginScreen({ navigation, route }) {
     <SafeAreaView className="flex-1 bg-[#0B0D17]">
     <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'} className="flex-1 justify-center px-8">
       <View className="items-center mb-12">
-        <Text className="text-5xl text-[#7C3AED] font-bold tracking-tight">aether</Text>
-        <Text className="text-gray-400 text-lg tracking-widest uppercase mt-2">Math Engine</Text>
+        <Text className="text-5xl text-[#7C3AED] font-bold tracking-tight">Ai Calculator</Text>
+        <Text className="text-gray-400 text-lg tracking-widest uppercase mt-2">Smart Math Workspace</Text>
       </View>
       
       <View className="space-y-4 mb-8">
@@ -54,7 +52,7 @@ export default function LoginScreen({ navigation, route }) {
       </TouchableOpacity>
 
       <TouchableOpacity onPress={() => navigation.navigate('Register', { setToken })} className="mt-8 items-center">
-        <Text className="text-gray-400 text-lg">New to Aether? <Text className="text-white font-bold">Create Account</Text></Text>
+        <Text className="text-gray-400 text-lg">New here? <Text className="text-white font-bold">Create Account</Text></Text>
       </TouchableOpacity>
     </KeyboardAvoidingView>
     </SafeAreaView>

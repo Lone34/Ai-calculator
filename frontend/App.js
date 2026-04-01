@@ -5,24 +5,33 @@ import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { StatusBar } from 'expo-status-bar';
+import { SafeAreaProvider, useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import LoginScreen from './src/screens/LoginScreen';
 import RegisterScreen from './src/screens/RegisterScreen';
 import BasicCalculatorScreen from './src/screens/BasicCalculatorScreen';
 import AIChatScreen from './src/screens/AIChatScreen';
 import SketchScreen from './src/screens/SketchScreen';
-import CameraScreen from './src/screens/CameraScreen';
+import ProfileScreen from './src/screens/ProfileScreen';
 
 const Tab = createBottomTabNavigator();
 const Stack = createNativeStackNavigator();
 
 import { Ionicons } from '@expo/vector-icons';
 
-function TabNavigator() {
+function TabNavigator({ setUserToken }) {
+  const insets = useSafeAreaInsets();
+  const bottomInset = Math.max(insets.bottom, 10);
+  const tabBarHeight = 56 + bottomInset;
+
   return (
     <Tab.Navigator
       screenOptions={({ route }) => ({
         headerShown: false,
+        sceneStyle: {
+          backgroundColor: '#0B0D17',
+        },
+        tabBarHideOnKeyboard: true,
         tabBarIcon: ({ focused, color, size }) => {
           let iconName;
           if (route.name === 'Calculator') {
@@ -31,8 +40,8 @@ function TabNavigator() {
             iconName = focused ? 'sparkles' : 'sparkles-outline';
           } else if (route.name === 'Sketch') {
             iconName = focused ? 'pencil' : 'pencil-outline';
-          } else if (route.name === 'Scan') {
-            iconName = focused ? 'camera' : 'camera-outline';
+          } else if (route.name === 'Profile') {
+            iconName = focused ? 'person' : 'person-outline';
           }
           return <Ionicons name={iconName} size={size} color={color} />;
         },
@@ -40,9 +49,14 @@ function TabNavigator() {
           backgroundColor: '#0B0D17',
           borderTopColor: 'rgba(255, 255, 255, 0.05)',
           borderTopWidth: 1,
-          paddingBottom: 8,
-          paddingTop: 8,
-          height: 60,
+          paddingBottom: bottomInset,
+          paddingTop: 10,
+          height: tabBarHeight,
+          elevation: 16,
+          zIndex: 50,
+        },
+        tabBarLabelStyle: {
+          paddingBottom: 2,
         },
         tabBarActiveTintColor: '#7C3AED',
         tabBarInactiveTintColor: '#666',
@@ -51,7 +65,9 @@ function TabNavigator() {
       <Tab.Screen name="Calculator" component={BasicCalculatorScreen} />
       <Tab.Screen name="AI Solve" component={AIChatScreen} />
       <Tab.Screen name="Sketch" component={SketchScreen} />
-      <Tab.Screen name="Scan" component={CameraScreen} />
+      <Tab.Screen name="Profile">
+        {(props) => <ProfileScreen {...props} setToken={setUserToken} />}
+      </Tab.Screen>
     </Tab.Navigator>
   );
 }
@@ -84,18 +100,22 @@ export default function App() {
   }
 
   return (
-    <NavigationContainer>
-      <StatusBar style="light" />
-      <Stack.Navigator screenOptions={{ headerShown: false }}>
-        {userToken == null ? (
-          <>
-            <Stack.Screen name="Login" component={LoginScreen} initialParams={{ setToken: setUserToken }} />
-            <Stack.Screen name="Register" component={RegisterScreen} initialParams={{ setToken: setUserToken }} />
-          </>
-        ) : (
-          <Stack.Screen name="MainTabs" component={TabNavigator} />
-        )}
-      </Stack.Navigator>
-    </NavigationContainer>
+    <SafeAreaProvider>
+      <NavigationContainer>
+        <StatusBar style="light" />
+        <Stack.Navigator screenOptions={{ headerShown: false }}>
+          {userToken == null ? (
+            <>
+              <Stack.Screen name="Login" component={LoginScreen} initialParams={{ setToken: setUserToken }} />
+              <Stack.Screen name="Register" component={RegisterScreen} initialParams={{ setToken: setUserToken }} />
+            </>
+          ) : (
+            <Stack.Screen name="MainTabs">
+              {(props) => <TabNavigator {...props} setUserToken={setUserToken} />}
+            </Stack.Screen>
+          )}
+        </Stack.Navigator>
+      </NavigationContainer>
+    </SafeAreaProvider>
   );
 }

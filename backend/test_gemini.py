@@ -1,8 +1,21 @@
 import urllib.request
 import json
 import os
+from pathlib import Path
 
-api_key = os.environ.get('GEMINI_API_KEY', 'AIzaSyAh9uUZIZud-ps3cYACIuAI8lHGqnkKoUM')
+env_path = Path(__file__).resolve().parent / '.env'
+if env_path.exists():
+    for raw_line in env_path.read_text().splitlines():
+        line = raw_line.strip()
+        if not line or line.startswith('#') or '=' not in line:
+            continue
+        key, value = line.split('=', 1)
+        os.environ.setdefault(key.strip(), value.strip().strip('"').strip("'"))
+
+api_key = os.environ.get('GEMINI_API_KEY')
+if not api_key:
+    raise RuntimeError('GEMINI_API_KEY is missing. Add it to backend/.env before running this script.')
+
 model_name = 'gemini-2.5-flash'
 url = f"https://generativelanguage.googleapis.com/v1beta/models/{model_name}:generateContent?key={api_key}"
 

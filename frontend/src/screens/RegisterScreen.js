@@ -2,8 +2,7 @@ import React, { useState } from 'react';
 import { View, Text, TextInput, TouchableOpacity, SafeAreaView, Alert, KeyboardAvoidingView, Platform } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import axios from 'axios';
-
-const API_URL = 'http://10.99.170.36:8000/api';
+import { API_URL } from '../config/api';
 
 export default function RegisterScreen({ navigation, route }) {
   const [username, setUsername] = useState('');
@@ -28,7 +27,7 @@ export default function RegisterScreen({ navigation, route }) {
     <SafeAreaView className="flex-1 bg-[#0B0D17]">
     <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'} className="flex-1 justify-center px-8">
       <View className="items-center mb-10">
-        <Text className="text-4xl text-white font-bold">Join Aether</Text>
+        <Text className="text-4xl text-white font-bold">Join Ai Calculator</Text>
       </View>
       
       <View className="space-y-4 mb-8">

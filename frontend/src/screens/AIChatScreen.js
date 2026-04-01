@@ -9,9 +9,10 @@ import { Ionicons } from '@expo/vector-icons';
 import * as ImagePicker from 'expo-image-picker';
 import * as Clipboard from 'expo-clipboard';
 import Markdown from 'react-native-markdown-display';
+import { useBottomTabBarHeight } from '@react-navigation/bottom-tabs';
 import axios from 'axios';
+import { API_URL } from '../config/api';
 
-const API_URL = 'http://10.99.170.36:8000/api';
 const SCREEN_WIDTH = Dimensions.get('window').width;
 
 // ── Colors & Styles ──
@@ -109,6 +110,7 @@ const ChatBubble = memo(({ message, onImagePress }) => {
 });
 
 export default function AISolveScreen() {
+  const tabBarHeight = useBottomTabBarHeight();
   const [messages, setMessages] = useState([]);
   const [inputText, setInputText] = useState('');
   const [selectedImage, setSelectedImage] = useState(null);
@@ -146,7 +148,7 @@ export default function AISolveScreen() {
       {
         id: 'welcome',
         role: 'ai',
-        text: 'Hi! I am Aether AI. I can help you solve math problems step-by-step. You can type a question like "Solve 2x + 5 = 15" or send me a picture of your homework!'
+        text: 'Hi! I am Ai Calculator Assistant. I can help you solve math problems step-by-step. You can type a question like "Solve 2x + 5 = 15" or send me a picture of your homework!'
       }
     ]);
     closeDrawer();
@@ -319,7 +321,7 @@ export default function AISolveScreen() {
         <ScrollView
             ref={scrollViewRef}
             style={styles.chatArea}
-            contentContainerStyle={styles.chatContent}
+            contentContainerStyle={[styles.chatContent, { paddingBottom: tabBarHeight + 16 }]}
             onContentSizeChange={() => scrollViewRef.current?.scrollToEnd({ animated: true })}
             keyboardShouldPersistTaps="handled"
         >
@@ -334,14 +336,14 @@ export default function AISolveScreen() {
                 </View>
                 <View style={[styles.bubble, styles.bubbleAI, styles.loadingBubble]}>
                 <ActivityIndicator size="small" color={COLORS.primary} />
-                <Text style={styles.loadingText}>Aether is thinking...</Text>
+                <Text style={styles.loadingText}>Ai Calculator is thinking...</Text>
                 </View>
             </View>
             )}
         </ScrollView>
 
         {/* Input Area */}
-        <View style={styles.inputContainer}>
+        <View style={[styles.inputContainer, { paddingBottom: Math.max(tabBarHeight, 12) }]}>
             {selectedImage && (
             <View style={styles.imagePreviewContainer}>
                 <Image source={{ uri: selectedImage.uri }} style={styles.imagePreview} />

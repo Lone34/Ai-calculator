@@ -3,6 +3,24 @@ from pathlib import Path
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
+
+def load_env_file(env_path):
+    if not env_path.exists():
+        return
+
+    for raw_line in env_path.read_text().splitlines():
+        line = raw_line.strip()
+        if not line or line.startswith('#') or '=' not in line:
+            continue
+
+        key, value = line.split('=', 1)
+        key = key.strip()
+        value = value.strip().strip('"').strip("'")
+        os.environ.setdefault(key, value)
+
+
+load_env_file(BASE_DIR / '.env')
+
 SECRET_KEY = 'django-insecure-dummy-key-for-aether-math'
 DEBUG = True
 ALLOWED_HOSTS = ['*']
@@ -85,4 +103,16 @@ CELERY_BROKER_URL = 'redis://localhost:6379/0'
 CELERY_RESULT_BACKEND = 'redis://localhost:6379/0'
 
 # Gemini API
-GEMINI_API_KEY = os.environ.get('GEMINI_API_KEY', 'AIzaSyAh9uUZIZud-ps3cYACIuAI8lHGqnkKoUM')
+GEMINI_API_KEY = os.environ.get('GEMINI_API_KEY', '')
+
+# Razorpay (secret key must stay server-side only)
+RAZORPAY_KEY_ID = os.environ.get('RAZORPAY_KEY_ID', '')
+RAZORPAY_KEY_SECRET = os.environ.get('RAZORPAY_KEY_SECRET', '')
+RAZORPAY_WEBHOOK_SECRET = os.environ.get('RAZORPAY_WEBHOOK_SECRET', '')
+
+# Feature enforcement
+SUBSCRIPTION_ENFORCE_AI_SOLVE = os.environ.get('SUBSCRIPTION_ENFORCE_AI_SOLVE', 'true').strip().lower() in {'1', 'true', 'yes'}
+SUBSCRIPTION_ENABLE_FREE_TRIAL = os.environ.get('SUBSCRIPTION_ENABLE_FREE_TRIAL', 'true').strip().lower() in {'1', 'true', 'yes'}
+SUBSCRIPTION_FREE_TRIAL_DAYS = int(os.environ.get('SUBSCRIPTION_FREE_TRIAL_DAYS', '3') or '3')
+SUBSCRIPTION_TRIAL_TRUST_X_FORWARDED_FOR = os.environ.get('SUBSCRIPTION_TRIAL_TRUST_X_FORWARDED_FOR', 'false').strip().lower() in {'1', 'true', 'yes'}
+SUBSCRIPTION_TRIAL_IP_HASH_SECRET = os.environ.get('SUBSCRIPTION_TRIAL_IP_HASH_SECRET', '')
