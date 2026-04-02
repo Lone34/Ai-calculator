@@ -21,9 +21,22 @@ def load_env_file(env_path):
 
 load_env_file(BASE_DIR / '.env')
 
-SECRET_KEY = 'django-insecure-dummy-key-for-aether-math'
-DEBUG = True
-ALLOWED_HOSTS = ['*']
+
+def env_bool(name, default=False):
+    raw = os.environ.get(name)
+    if raw is None:
+        return default
+    return str(raw).strip().lower() in {'1', 'true', 'yes', 'on'}
+
+
+def env_list(name, default=''):
+    raw = os.environ.get(name, default) or ''
+    return [item.strip() for item in raw.split(',') if item.strip()]
+
+
+SECRET_KEY = os.environ.get('DJANGO_SECRET_KEY', 'django-insecure-dummy-key-for-aether-math')
+DEBUG = env_bool('DJANGO_DEBUG', True)
+ALLOWED_HOSTS = env_list('DJANGO_ALLOWED_HOSTS', '*' if DEBUG else '')
 
 INSTALLED_APPS = [
     'django.contrib.admin',
@@ -50,7 +63,11 @@ MIDDLEWARE = [
 ]
 
 ROOT_URLCONF = 'aether_project.urls'
-CORS_ALLOW_ALL_ORIGINS = True
+
+# CORS / CSRF
+CORS_ALLOW_ALL_ORIGINS = env_bool('CORS_ALLOW_ALL_ORIGINS', DEBUG)
+CORS_ALLOWED_ORIGINS = env_list('CORS_ALLOWED_ORIGINS', '')
+CSRF_TRUSTED_ORIGINS = env_list('CSRF_TRUSTED_ORIGINS', '')
 
 TEMPLATES = [
     {
@@ -98,6 +115,12 @@ REST_FRAMEWORK = {
         'rest_framework.permissions.IsAuthenticated',
     ),
 }
+
+if not DEBUG:
+    SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+    SESSION_COOKIE_SECURE = env_bool('SESSION_COOKIE_SECURE', True)
+    CSRF_COOKIE_SECURE = env_bool('CSRF_COOKIE_SECURE', True)
+    SECURE_SSL_REDIRECT = env_bool('SECURE_SSL_REDIRECT', False)
 
 CELERY_BROKER_URL = 'redis://localhost:6379/0'
 CELERY_RESULT_BACKEND = 'redis://localhost:6379/0'

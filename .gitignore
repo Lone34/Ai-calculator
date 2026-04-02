@@ -17,4 +17,7 @@ db.sqlite3
 .env
 .env.*
 .env.local
+!.env.example
+!frontend/.env.example
+!backend/.env.example
 .DS_Store

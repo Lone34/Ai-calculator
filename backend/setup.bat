@@ -7,4 +7,4 @@ pip install django djangorestframework django-cors-headers celery redis sympy ps
 echo Making migrations...
 python manage.py makemigrations core
 python manage.py migrate
-echo Backend setup complete! Run 'python manage.py runserver' to start.
+echo Backend setup complete! Run 'python manage.py runserver 0.0.0.0:8000' to allow LAN devices.
