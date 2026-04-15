@@ -23,7 +23,9 @@ logger = logging.getLogger(__name__)
 GEMINI_MODELS = [
     'gemini-2.5-flash',
     'gemini-2.0-flash',
+    'gemini-1.5-pro',
     'gemini-1.5-flash',
+    'gemini-1.5-flash-8b',
 ]
 
 MATH_SYSTEM_PROMPT = """You are an expert math tutor and problem solver called Aether AI. Your job is to help students understand and solve math problems.
@@ -78,8 +80,10 @@ class MathSessionViewSet(viewsets.ModelViewSet):
             session_type = self.request.query_params.get('type')
             if session_type == 'ai':
                 return qs.filter(title__startswith='AI Solve:')
+            elif session_type == 'sketch':
+                return qs.filter(title__startswith='Sketch:')
             elif session_type == 'calc':
-                return qs.exclude(title__startswith='AI Solve:')
+                return qs.exclude(title__startswith='AI Solve:').exclude(title__startswith='Sketch:')
             return qs
         return self.queryset.none()
         
@@ -151,7 +155,8 @@ class InteractionViewSet(viewsets.ModelViewSet):
 
 def _call_gemini(model_name, contents, api_key):
     """Call Gemini API with given model. Returns response text or raises."""
-    url = f"https://generativelanguage.googleapis.com/v1beta/models/{model_name}:generateContent?key={api_key}"
+    clean_key = api_key.strip() if api_key else ""
+    url = f"https://generativelanguage.googleapis.com/v1beta/models/{model_name}:generateContent?key={clean_key}"
     payload = {
         "contents": contents,
         "generationConfig": {
@@ -186,6 +191,7 @@ class AISolveView(APIView):
         image_mime = request.data.get('image_mime', 'image/jpeg')
         history = request.data.get('history', [])
         session_id = request.data.get('session_id', None)
+        source = request.data.get('source', 'ai')
         
         if not message and not image_base64:
             return Response({'error': 'No message or image provided'}, status=400)
@@ -204,9 +210,10 @@ class AISolveView(APIView):
             title_text = message[:30] + '...' if len(message) > 30 else message
             if not title_text:
                 title_text = "Image Problem"
+            prefix = "Sketch:" if source == 'sketch' else "AI Solve:"
             session = MathSession.objects.create(
                 user=request.user, 
-                title=f"AI Solve: {title_text}"
+                title=f"{prefix} {title_text}"
             )
             
         # Record user interaction (without storing base64 image deeply, just text for simplicity)

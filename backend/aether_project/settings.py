@@ -1,7 +1,9 @@
 import os
 from pathlib import Path
+from dotenv import load_dotenv
 
 BASE_DIR = Path(__file__).resolve().parent.parent
+load_dotenv(os.path.join(BASE_DIR, '.env'))
 
 SECRET_KEY = 'django-insecure-dummy-key-for-aether-math'
 DEBUG = True
@@ -85,4 +87,4 @@ CELERY_BROKER_URL = 'redis://localhost:6379/0'
 CELERY_RESULT_BACKEND = 'redis://localhost:6379/0'
 
 # Gemini API
-GEMINI_API_KEY = os.environ.get('GEMINI_API_KEY', 'REDACTED')
+GEMINI_API_KEY = os.environ.get('GEMINI_API_KEY', '').strip()
